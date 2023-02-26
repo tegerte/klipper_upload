@@ -13,6 +13,13 @@ from watchdog.events import PatternMatchingEventHandler
 
 
 PATTERNS = ["*.gcode"]
+COLOR = {
+    "HEADER": "\033[95m",
+    "BLUE": "\033[94m",
+    "GREEN": "\033[92m",
+    "RED": "\033[91m",
+    "ENDC": "\033[0m",
+}
 
 
 ignore_patterns = None
@@ -67,12 +74,13 @@ def upload_gcode(path_to_file: Path, ip_adress: str) -> tuple[int, str]:
             # catastrophic error...
             print(f"Something went really wrong, error message: {e}")
             exit(100)
-        # print(r.text)
-        print(f"Upload took {r.elapsed.seconds} seconds")
 
     if r != "" and r.json()["item"]["path"] == file_path.name:
         print(
-            "~~~~~ Successfully uploaded new gcode file to moonraker  ~~~~~~~~~~~~~~~~~"
+            COLOR["GREEN"],
+            f"~~~~~ Successfully uploaded new gcode file to moonraker  ~~~~~~~~~~~~~~~~~\n"
+            f"Upload took {r.elapsed.seconds} seconds",
+            COLOR["ENDC"],
         )
         return 0, ""
     return 1, "some other error"
@@ -82,7 +90,7 @@ def on_created(event):
     print(f"hey ho, new gcode {event.src_path} has been created!")
     ret = upload_gcode(event.src_path, ip)
     if ret[0] > 0:
-        print(f"Sh..., that didn't work, exiting...")
+        print(COLOR["RED"], f"Sh..., that didn't work, exiting...", COLOR["ENDC"])
         exit(ret[0])
 
 
@@ -99,11 +107,12 @@ def on_moved(event):
     # the way PrisaSlicer generates the files...
     ret = upload_gcode(event.dest_path, ip)
     if ret[0] > 0:
-        print(f"Sh..., that didn't work, exiting...")
+        print(COLOR["RED"], f"Sh..., that didn't work, exiting...", COLOR["ENDC"])
         # that is not so nice, but we're in a threaded process so simply exiting will not work
         os.kill(os.getpid(), signal.SIGINT)
 
 
+os.system("")
 my_event_handler.on_created = on_created
 my_event_handler.on_deleted = on_deleted
 my_event_handler.on_modified = on_modified
