@@ -104,7 +104,6 @@ def on_moved(event):
         os.kill(os.getpid(), signal.SIGINT)
 
 
-
 my_event_handler.on_created = on_created
 my_event_handler.on_deleted = on_deleted
 my_event_handler.on_modified = on_modified
