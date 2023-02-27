@@ -63,7 +63,7 @@ def upload_gcode(path_to_file: Path, ip_adress: str) -> tuple[int, str]:
             r = requests.post(f"http://{ip_adress}/server/files/upload", files=pload)
         except requests.exceptions.HTTPError as errh:
             print("Http Error:", errh)
-            exit(11)
+            return 11, str(errh)
         except requests.exceptions.ConnectionError as errc:
             print("Error Connecting:", errc)
             return 12, str(errc)
@@ -73,7 +73,7 @@ def upload_gcode(path_to_file: Path, ip_adress: str) -> tuple[int, str]:
         except requests.exceptions.RequestException as e:
             # catastrophic error...
             print(f"Something went really wrong, error message: {e}")
-            exit(100)
+            return 100, "Apokalypse"
 
     if r != "" and r.json()["item"]["path"] == file_path.name:
         print(
@@ -89,9 +89,7 @@ def upload_gcode(path_to_file: Path, ip_adress: str) -> tuple[int, str]:
 def on_created(event):
     print(f"hey ho, new gcode {event.src_path} has been created!")
     ret = upload_gcode(event.src_path, ip)
-    if ret[0] > 0:
-        print(COLOR["RED"], f"Sh..., that didn't work, exiting...", COLOR["ENDC"])
-        exit(ret[0])
+    handle_upload_return(ret)
 
 
 def on_deleted(event):
@@ -106,10 +104,21 @@ def on_moved(event):
     print(f"Hey, i think PrucaSlicer created some nice gcode {event.dest_path} !")
     # the way PrisaSlicer generates the files...
     ret = upload_gcode(event.dest_path, ip)
+    handle_upload_return(ret)
+
+
+def handle_upload_return(ret: tuple[int, str]) -> None:
+    """
+    simple helper to handle the return of uploading function.
+    :param ret: return tuple of uploader
+    :return: None
+    """
     if ret[0] > 0:
         print(COLOR["RED"], f"Sh..., that didn't work, exiting...", COLOR["ENDC"])
         # that is not so nice, but we're in a threaded process so simply exiting will not work
         os.kill(os.getpid(), signal.SIGINT)
+    else:
+        print("Waiting for next job...")
 
 
 os.system("")
