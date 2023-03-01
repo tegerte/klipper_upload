@@ -25,7 +25,7 @@ pipenv shell
 ```
 
 
-Usage: 
+## Usage: 
 ```bash
 <WHEREEVER _YOUR_VENVS_LIVE>/klipper_upload-cINr6ycz/bin/python
 <WHEREEVER_YOUR_CODE_LIVES>
@@ -33,11 +33,11 @@ Usage:
 ```
 ## Command line params:
 
-| short | long           | meaning                              |
-|-------|----------------|--------------------------------------|
-| -i    | --ip_address   | IP-address of Moonraker              |
-| -d    | --observed_dir | directory to monitor for gcode files |
-| -f    | --fancy        | fancy mode, play sounds              |
+| short | long           | meaning                                           |
+|-------|----------------|---------------------------------------------------|
+| -i    | --ip_address   | IP-address of Moonraker                           |
+| -d    | --observed_dir | directory to monitor for gcode files              |
+| -f    | --fancy        | fancy mode, play sounds, optional, default =False |
 
 
 
