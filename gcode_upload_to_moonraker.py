@@ -1,14 +1,14 @@
+"""
+Utility for making upload to Creality Sonic Pad (Or any other device that.
+Sound effects from Pixabay.
+"""
+
 import os
 import signal
-
 import time
-from subprocess import Popen
-
 import requests
 import argparse
-
-# import logging
-
+from subprocess import Popen
 from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
@@ -47,23 +47,18 @@ def get_size(path):
         return f"{round(size/(pow(1024,3)), 2)} GB"
 
 
-def upload_gcode(path_to_file: Path, ip_adress: str) -> tuple[int, str]:
+def upload_gcode(path_to_file: Path) -> tuple[int, str]:
     """
     Uses the API of Moonraker to upload a file to Klipper. Its checked in response if the uploaded filename is
     returned as indication of successful upload.
+
     :param path_to_file: Path-opbj
     :return: tuple errorcode, errormessage
     """
     file_path = Path(path_to_file)
-    print(f"\nInitiating  upload to {ip_adress} !")
-    if fancy_mode:
-        args = " --no-show-progress -V0"
-        cmd_cntdown = "play female-robotic-countdown-5-to-1-47653.mp3" + args
-        cmd_fany_spaceship_sound = "play space-ship-soaring-81591.mp3" + args
-        # Popen starts those processes in parallel wich gives a cool overlay ;-)
-        Popen(cmd_cntdown, shell=True)
-        time.sleep(.4)
-        Popen(cmd_fany_spaceship_sound, shell=True)
+    print(f"\nInitiating  upload to {args.ip_address} !")
+    if args.fancy:
+        play_fancy_sounds()
 
     with open(path_to_file, "rb") as gcode:
         pload = {"file": gcode, "print": "false"}
@@ -71,7 +66,7 @@ def upload_gcode(path_to_file: Path, ip_adress: str) -> tuple[int, str]:
             f"~~~~~ Starting upload of {get_size(file_path)} to moonraker  ~~~~~~~~~~~~~~~~~"
         )
         try:
-            r = requests.post(f"http://{ip_adress}/server/files/upload", files=pload)
+            r = requests.post(f"http://{args.ip_address}/server/files/upload", files=pload)
         except requests.exceptions.HTTPError as errh:
             print("Http Error:", errh)
             return 11, str(errh)
@@ -97,9 +92,19 @@ def upload_gcode(path_to_file: Path, ip_adress: str) -> tuple[int, str]:
     return 1, "some other error"
 
 
+def play_fancy_sounds():
+    cmd_args = " --no-show-progress -V0"
+    cmd_cntdown = "play female-robotic-countdown-5-to-1-47653.mp3" + cmd_args
+    cmd_fany_spaceship_sound = "play space-ship-soaring-81591.mp3" + cmd_args
+    # Popen starts those processes in parallel wich gives a cool overlay ;-)
+    Popen(cmd_cntdown, shell=True)
+    time.sleep(.4)
+    Popen(cmd_fany_spaceship_sound, shell=True)
+
+
 def on_created(event):
     print(f"hey ho, new gcode {event.src_path} has been created!")
-    ret = upload_gcode(event.src_path, ip)
+    ret = upload_gcode(event.src_path)
     handle_upload_return(ret)
 
 
@@ -114,7 +119,7 @@ def on_modified(event):
 def on_moved(event):
     print(f"Hey, i think PrucaSlicer created some nice gcode {event.dest_path} !")
     # the way PrisaSlicer generates the files...
-    ret = upload_gcode(event.dest_path, ip)
+    ret = upload_gcode(event.dest_path)
     handle_upload_return(ret)
 
 
@@ -146,19 +151,11 @@ parser.add_argument(
     "-f", "--fancy", action=argparse.BooleanOptionalAction, default=False
 )
 
-
 args = parser.parse_args()
-
-
-ip = args.ip_address
 path_gcode = args.observed_dir
-fancy_mode = args.fancy
-print(f"Listening for changes in {path_gcode} to upload to {ip}... ")
-
+print(f"Listening for changes in {path_gcode} to upload to {args.ip_adress}... ")
 my_observer.schedule(my_event_handler, path_gcode, recursive=go_recursively)
 my_observer.start()
-
-
 try:
     while True:
         time.sleep(1)

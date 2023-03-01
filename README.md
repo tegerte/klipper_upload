@@ -10,7 +10,8 @@ Find the docu of the file upload in Moonraker [here](https://moonraker.readthedo
 
 ## shell scripts
 A shell script for Linux users adds some convenience.
-If you want the more fancy version with some cool sounds you can lunch the `run_klipper_upload_service_fancy.sh` wich activates sounds
+If you want the more fancy version with some cool sounds you can lunch the `run_klipper_upload_service_fancy.sh` wich activates sounds.
+Sound effects from <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=6313">Pixabay</a>
 
 ## Install 
 
@@ -39,5 +40,6 @@ pipenv shell
 | -d    | --observed_dir | directory to monitor for gcode files              |
 | -f    | --fancy        | fancy mode, play sounds, optional, default =False |
 
-
+## remarks
+There is no validation of input parameters done. So 
 
