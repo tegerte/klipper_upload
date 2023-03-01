@@ -1,6 +1,6 @@
 # klipper_upload
 
-Small Utility to automate gcode upload to klipper after slicing in PrusaSlicer. 
+Small Utility to automate gcode upload to klipper after slicing in e.g. PrusaSlicer. 
 
 Inspired by [this thread on GitHub](https://github.com/Arksine/moonraker/discussions/128) I decided to create a small automation utility for improvement of my workflow for generating gcode and 3D-printing. I like to use  PrusaSlicer, and unfortunately it has no way to export gcode to a Creality SonicPad.
 
@@ -11,7 +11,8 @@ Find the docu of the file upload in Moonraker [here](https://moonraker.readthedo
 ## shell scripts
 A shell script for Linux users adds some convenience.
 If you want the more fancy version with some cool sounds you can lunch the `run_klipper_upload_service_fancy.sh` wich activates sounds.
-Sound effects from <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=6313">Pixabay</a>
+
+Sound effects are downloaded from <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=6313">Pixabay</a> Thx!.
 
 ## Install 
 
@@ -40,6 +41,4 @@ pipenv shell
 | -d    | --observed_dir | directory to monitor for gcode files              |
 | -f    | --fancy        | fancy mode, play sounds, optional, default =False |
 
-## remarks
-There is no validation of input parameters done. So 
 
