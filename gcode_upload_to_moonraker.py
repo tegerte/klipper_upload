@@ -1,7 +1,9 @@
 import os
 import signal
-import sys
+
 import time
+from subprocess import Popen
+
 import requests
 import argparse
 
@@ -50,10 +52,19 @@ def upload_gcode(path_to_file: Path, ip_adress: str) -> tuple[int, str]:
     Uses the API of Moonraker to upload a file to Klipper. Its checked in response if the uploaded filename is
     returned as indication of successful upload.
     :param path_to_file: Path-opbj
-    :return: flag for successful operation
+    :return: tuple errorcode, errormessage
     """
     file_path = Path(path_to_file)
-    print(f"Initiating  upload to {ip_adress} !")
+    print(f"\nInitiating  upload to {ip_adress} !")
+    if fancy_mode:
+        args = " --no-show-progress -V0"
+        cmd_cntdown = "play female-robotic-countdown-5-to-1-47653.mp3" + args
+        cmd_fany_spaceship_sound = "play space-ship-soaring-81591.mp3" + args
+        # Popen starts those processes in parallel wich gives a cool overlay ;-)
+        Popen(cmd_cntdown, shell=True)
+        time.sleep(.4)
+        Popen(cmd_fany_spaceship_sound, shell=True)
+
     with open(path_to_file, "rb") as gcode:
         pload = {"file": gcode, "print": "false"}
         print(
@@ -131,12 +142,17 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("-i", "--ip_address")
 parser.add_argument("-d", "--observed_dir")
+parser.add_argument(
+    "-f", "--fancy", action=argparse.BooleanOptionalAction, default=False
+)
+
 
 args = parser.parse_args()
 
 
 ip = args.ip_address
 path_gcode = args.observed_dir
+fancy_mode = args.fancy
 print(f"Listening for changes in {path_gcode} to upload to {ip}... ")
 
 my_observer.schedule(my_event_handler, path_gcode, recursive=go_recursively)
