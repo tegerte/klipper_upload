@@ -14,7 +14,7 @@ A shell script for Linux users adds some convenience.
 If you want the more fancy version with some cool sounds you can lunch the `run_klipper_upload_service_fancy.sh` wich activates sounds.
 This might be a little hard to get that running on Windows... (maybe try [this approach](https://www.codeproject.com/Articles/33901/Compiling-SOX-with-Lame-and-Libmad-for-Windows))
 
-On Linux you might have to install [SoX](https://sox.sourceforge.net/sox.html) `sudo apt install sox`and run a `sudo apt install libsox-fmt-mp3`
+On Linux you might have to install [SoX](https://sox.sourceforge.net/sox.html) `sudo apt install sox` and run a `sudo apt install libsox-fmt-mp3`
 
 Sound effects are downloaded from <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=music&amp;utm_content=6313">Pixabay</a> Thx!.
 
