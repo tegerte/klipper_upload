@@ -2,11 +2,15 @@
 
 Small Utility to automate gcode upload to klipper after slicing in e.g. PrusaSlicer. 
 
-Inspired by [this thread on GitHub](https://github.com/Arksine/moonraker/discussions/128) I decided to create a small automation utility for improvement of my workflow for generating gcode and 3D-printing. I like to use  PrusaSlicer, and unfortunately it has no way to export gcode to a Creality SonicPad. After gcode-export in the directory monitored by this programm
+Inspired by [this thread on GitHub](https://github.com/Arksine/moonraker/discussions/128) I decided to create a small automation utility for improvement of my workflow for generating gcode and 3D-printing. 
+
+I like to use  PrusaSlicer, and unfortunately it has no way to export gcode to a Creality SonicPad. 
+
+After gcode-export in the directory monitored by this programm,
 
 ![Screenshot1.png](pictures%2FScreenshot1.png)
 
-The gcode-file gets uploaded to Klipper using Moonraker-API.
+the gcode-file gets uploaded to Klipper using Moonraker-API.
 
 Console output will look like this:
 
@@ -16,7 +20,7 @@ Find the docu of the file upload in Moonraker [here](https://moonraker.readthedo
 
 ## shell scripts
 A shell script for Linux users adds some convenience.
-## "Fancy" mode
+## "fancy" mode
 If you want the more fancy version with some cool sounds you can lunch the `run_klipper_upload_service_fancy.sh` wich activates sounds.
 This might be a little hard to get that running on Windows as it uses the Linux application  [SoX](https://sox.sourceforge.net/sox.html)... (maybe try [this approach](https://www.codeproject.com/Articles/33901/Compiling-SOX-with-Lame-and-Libmad-for-Windows) to get that running on Windows)
 
