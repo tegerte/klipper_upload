@@ -2,14 +2,13 @@
 
 Small Utility to automate gcode upload to klipper after slicing in e.g. PrusaSlicer. 
 
-Inspired by [this thread on GitHub](https://github.com/Arksine/moonraker/discussions/128) I decided to create a small automation utility for improvement of my workflow for generating gcode and 3D-printing. I like to use  PrusaSlicer, and unfortunately it has no way to export gcode to a Creality SonicPad.
+Inspired by [this thread on GitHub](https://github.com/Arksine/moonraker/discussions/128) I decided to create a small automation utility for improvement of my workflow for generating gcode and 3D-printing. I like to use  PrusaSlicer, and unfortunately it has no way to export gcode to a Creality SonicPad. After gcode-export in the directory monitored by this programm
 
 ![Screenshot1.png](pictures%2FScreenshot1.png)
 
-The script monitors a directory for newly generated 
-gcode-files and uploads them to Klipper using Moonraker-API.
+The gcode-file gets uploaded to Klipper using Moonraker-API.
 
-This will look like this on your console:
+Console output will look like this:
 
 ![Screenshot2.png](pictures%2FScreenshot2.png)
 
