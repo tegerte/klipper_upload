@@ -66,7 +66,9 @@ def upload_gcode(path_to_file: Path) -> tuple[int, str]:
             f"~~~~~ Starting upload of {get_size(file_path)} to moonraker  ~~~~~~~~~~~~~~~~~"
         )
         try:
-            r = requests.post(f"http://{args.ip_address}/server/files/upload", files=pload)
+            r = requests.post(
+                f"http://{args.ip_address}/server/files/upload", files=pload
+            )
         except requests.exceptions.HTTPError as errh:
             print("Http Error:", errh)
             return 11, str(errh)
@@ -80,6 +82,9 @@ def upload_gcode(path_to_file: Path) -> tuple[int, str]:
             # catastrophic error...
             print(f"Something went really wrong, error message: {e}")
             return 100, "Apokalypse"
+    if args.debug:
+        print("\n Return from API was:\n")
+        print(r.json())
 
     if r != "" and r.json()["item"]["path"] == file_path.name:
         print(
@@ -93,12 +98,13 @@ def upload_gcode(path_to_file: Path) -> tuple[int, str]:
 
 
 def play_fancy_sounds():
-    cmd_args = " --no-show-progress -V0"
-    cmd_cntdown = "play female-robotic-countdown-5-to-1-47653.mp3" + cmd_args
-    cmd_fany_spaceship_sound = "play space-ship-soaring-81591.mp3" + cmd_args
+    # do not show any distracting SoX output
+    cmd_args = "" if args.debug else " --no-show-progress -V0"
+    cmd_cntdown = "play sounds/female-robotic-countdown-5-to-1-47653.mp3" + cmd_args
+    cmd_fany_spaceship_sound = "play sounds/space-ship-soaring-81591.mp3" + cmd_args
     # Popen starts those processes in parallel wich gives a cool overlay ;-)
     Popen(cmd_cntdown, shell=True)
-    time.sleep(.4)
+    time.sleep(0.4)
     Popen(cmd_fany_spaceship_sound, shell=True)
 
 
@@ -150,10 +156,13 @@ parser.add_argument("-d", "--observed_dir")
 parser.add_argument(
     "-f", "--fancy", action=argparse.BooleanOptionalAction, default=False
 )
+parser.add_argument(
+    "-db", "--debug", action=argparse.BooleanOptionalAction, default=False
+)
 
 args = parser.parse_args()
 path_gcode = args.observed_dir
-print(f"Listening for changes in {path_gcode} to upload to {args.ip_adress}... ")
+print(f"Listening for changes in {path_gcode} to upload to {args.ip_address}... ")
 my_observer.schedule(my_event_handler, path_gcode, recursive=go_recursively)
 my_observer.start()
 try:
@@ -163,3 +172,4 @@ try:
 except KeyboardInterrupt:
     my_observer.stop()
 my_observer.join()
+exit(1)
