@@ -1,5 +1,5 @@
 """
-Utility for making upload to Creality Sonic Pad (Or any other device that.
+Utility for making upload to Creality Sonic Pad (Or any other device that runs moonraker API).
 Sound effects from Pixabay.
 """
 
@@ -13,7 +13,6 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
-
 PATTERNS = ["*.gcode"]
 COLOR = {
     "HEADER": "\033[95m",
@@ -22,7 +21,6 @@ COLOR = {
     "RED": "\033[91m",
     "ENDC": "\033[0m",
 }
-
 
 ignore_patterns = None
 ignore_directories = False
@@ -40,11 +38,11 @@ def get_size(path):
     if size < 1024:
         return f"{size} bytes"
     elif size < pow(1024, 2):
-        return f"{round(size/1024, 2)} KB"
+        return f"{round(size / 1024, 2)} KB"
     elif size < pow(1024, 3):
-        return f"{round(size/(pow(1024,2)), 2)} MB"
+        return f"{round(size / (pow(1024, 2)), 2)} MB"
     elif size < pow(1024, 4):
-        return f"{round(size/(pow(1024,3)), 2)} GB"
+        return f"{round(size / (pow(1024, 3)), 2)} GB"
 
 
 def upload_gcode(path_to_file: Path) -> tuple[int, str]:
@@ -56,8 +54,8 @@ def upload_gcode(path_to_file: Path) -> tuple[int, str]:
     :return: tuple errorcode, errormessage
     """
     file_path = Path(path_to_file)
-    print(f"\nInitiating  upload to {args.ip_address} !")
-    if args.fancy:
+    print(f"\nInitiating  upload to {cl_args.ip_address} !")
+    if cl_args.fancy:
         play_fancy_sounds()
 
     with open(path_to_file, "rb") as gcode:
@@ -67,7 +65,7 @@ def upload_gcode(path_to_file: Path) -> tuple[int, str]:
         )
         try:
             r = requests.post(
-                f"http://{args.ip_address}/server/files/upload", files=pload
+                f"http://{cl_args.ip_address}/server/files/upload", files=pload
             )
         except requests.exceptions.HTTPError as errh:
             print("Http Error:", errh)
@@ -82,7 +80,7 @@ def upload_gcode(path_to_file: Path) -> tuple[int, str]:
             # catastrophic error...
             print(f"Something went really wrong, error message: {e}")
             return 100, "Apokalypse"
-    if args.debug:
+    if cl_args.debug:
         print("\n Return from API was:\n")
         print(r.json())
 
@@ -99,7 +97,7 @@ def upload_gcode(path_to_file: Path) -> tuple[int, str]:
 
 def play_fancy_sounds():
     # do not show any distracting SoX output
-    cmd_args = "" if args.debug else " --no-show-progress -V0"
+    cmd_args = "" if cl_args.debug else " --no-show-progress -V0"
     cmd_cntdown = "play sounds/female-robotic-countdown-5-to-1-47653.mp3" + cmd_args
     cmd_fany_spaceship_sound = "play sounds/space-ship-soaring-81591.mp3" + cmd_args
     # Popen starts those processes in parallel wich gives a cool overlay ;-)
@@ -143,33 +141,52 @@ def handle_upload_return(ret: tuple[int, str]) -> None:
         print("Waiting for next job...")
 
 
-os.system("")
-my_event_handler.on_created = on_created
-my_event_handler.on_deleted = on_deleted
-my_event_handler.on_modified = on_modified
-my_event_handler.on_moved = on_moved
+def handle_cl():
+    """
+    Handels the command line stuff.
+    :return: the args given on command line
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--ip_address")
+    parser.add_argument("-d", "--observed_dir")
+    parser.add_argument(
+        "-f", "--fancy", action=argparse.BooleanOptionalAction, default=False
+    )
+    parser.add_argument(
+        "-db", "--debug", action=argparse.BooleanOptionalAction, default=False
+    )
+    try:
+        return parser.parse_args()
 
-parser = argparse.ArgumentParser()
+    except argparse.ArgumentError:
+        return None
 
-parser.add_argument("-i", "--ip_address")
-parser.add_argument("-d", "--observed_dir")
-parser.add_argument(
-    "-f", "--fancy", action=argparse.BooleanOptionalAction, default=False
-)
-parser.add_argument(
-    "-db", "--debug", action=argparse.BooleanOptionalAction, default=False
-)
 
-args = parser.parse_args()
-path_gcode = args.observed_dir
-print(f"Listening for changes in {path_gcode} to upload to {args.ip_address}... ")
-my_observer.schedule(my_event_handler, path_gcode, recursive=go_recursively)
-my_observer.start()
-try:
-    while True:
-        time.sleep(1)
+def main():
+    os.system("")
+    my_event_handler.on_created = on_created
+    my_event_handler.on_deleted = on_deleted
+    my_event_handler.on_modified = on_modified
+    my_event_handler.on_moved = on_moved
 
-except KeyboardInterrupt:
-    my_observer.stop()
-my_observer.join()
-exit(1)
+    path_gcode = cl_args.observed_dir
+    print(
+        f"Listening for changes in {path_gcode} to upload to {cl_args.ip_address}... "
+    )
+    my_observer.schedule(my_event_handler, path_gcode, recursive=go_recursively)
+    my_observer.start()
+    try:
+        while True:
+            time.sleep(1)
+
+    except KeyboardInterrupt:
+        my_observer.stop()
+    my_observer.join()
+    exit(1)
+
+
+if __name__ == "__main__":
+    cl_args = handle_cl()
+    if not cl_args:
+        exit(0)
+    main()
