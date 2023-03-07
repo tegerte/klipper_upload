@@ -45,13 +45,13 @@ def get_size(path):
         return f"{round(size / (pow(1024, 3)), 2)} GB"
 
 
-def upload_gcode(path_to_file: Path) -> tuple[int, str]:
+def upload_gcode(path_to_file: Path) -> bool:
     """
     Uses the API of Moonraker to upload a file to Klipper. Its checked in response if the uploaded filename is
     returned as indication of successful upload.
 
     :param path_to_file: Path-opbj
-    :return: tuple errorcode, errormessage
+    :return: flag for successful operation
     """
     file_path = Path(path_to_file)
     print(f"\nInitiating  upload to {cl_args.ip_address} !")
@@ -67,19 +67,19 @@ def upload_gcode(path_to_file: Path) -> tuple[int, str]:
             r = requests.post(
                 f"http://{cl_args.ip_address}/server/files/upload", files=pload
             )
-        except requests.exceptions.HTTPError as errh:
-            print("Http Error:", errh)
-            return 11, str(errh)
-        except requests.exceptions.ConnectionError as errc:
-            print("Error Connecting:", errc)
-            return 12, str(errc)
-        except requests.exceptions.Timeout as errt:
-            print("Timeout Error:", errt)
-            return 13, str(errt)
+        except requests.exceptions.HTTPError as err_h:
+            print("Http Error:", err_h)
+            return False
+        except requests.exceptions.ConnectionError as err_c:
+            print("Error Connecting:", err_c)
+            return False
+        except requests.exceptions.Timeout as err_t:
+            print("Timeout Error:", err_t)
+            return False
         except requests.exceptions.RequestException as e:
             # catastrophic error...
             print(f"Something went really wrong, error message: {e}")
-            return 100, "Apokalypse"
+            return False
     if cl_args.debug:
         print("\n Return from API was:\n")
         print(r.json())
@@ -91,8 +91,8 @@ def upload_gcode(path_to_file: Path) -> tuple[int, str]:
             f"Upload took {r.elapsed.seconds} seconds",
             COLOR["ENDC"],
         )
-        return 0, ""
-    return 1, "some other error"
+        return True
+    return False
 
 
 def play_fancy_sounds():
@@ -127,13 +127,13 @@ def on_moved(event):
     handle_upload_return(ret)
 
 
-def handle_upload_return(ret: tuple[int, str]) -> None:
+def handle_upload_return(ret: bool) -> None:
     """
     simple helper to handle the return of uploading function.
-    :param ret: return tuple of uploader
+    :param ret: return flag of uploader (Error = True, No Error = False)
     :return: None
     """
-    if ret[0] > 0:
+    if ret:
         print(COLOR["RED"], f"Sh..., that didn't work, exiting...", COLOR["ENDC"])
         # that is not so nice, but we're in a threaded process so simply exiting will not work
         os.kill(os.getpid(), signal.SIGINT)
